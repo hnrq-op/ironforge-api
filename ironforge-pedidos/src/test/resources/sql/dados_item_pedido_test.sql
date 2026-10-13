@@ -1,0 +1,11 @@
+INSERT INTO tb_pedido (id, status, valor_total, chave_pagamento, data_criacao)
+VALUES
+    ('b1111111-1111-1111-1111-111111111111', 'PENDENTE', 189.80, 'PIX-KEY-123456789', CURRENT_TIMESTAMP),
+    ('b2222222-2222-2222-2222-222222222222', 'PAGO', 99.90, 'PIX-KEY-987654321', CURRENT_TIMESTAMP);
+
+-- 3. Carga inicial de Itens do Pedido
+INSERT INTO tb_item_pedido (id, pedido_id, produto_sku, quantidade, preco_unitario, subtotal)
+VALUES
+    (1, 'b1111111-1111-1111-1111-111111111111', 'CREATINA-500G', 2, 89.90, 179.80),
+    (2, 'b1111111-1111-1111-1111-111111111111', 'COPO-SHAKER-700ML', 1, 10.00, 10.00),
+    (3, 'b2222222-2222-2222-2222-222222222222', 'WHEY-ISOLADO-900G', 1, 99.90, 99.90);

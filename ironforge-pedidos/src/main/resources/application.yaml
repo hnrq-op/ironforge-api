@@ -1,0 +1,71 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ironforge-pedidos
+  autoconfigure:
+    exclude:
+      - org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ironforge_pedidos
+    username: ironforgeadmin
+    password: ironforge123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/ironforge-realm
+      client:
+        registration:
+          ironforge-pedidos-service:
+            provider: keycloak
+            client-id: ironforge-pedidos-service
+            client-secret: "${CLIENT_SECRET:}"
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/ironforge-realm
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+  kafka:
+    bootstrap-servers: 'localhost:29092'
+    consumer:
+      group-id: ironforge-pedidos-group-v2
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: "br.com.henrique.estudos.ironforge_pedidos.subscriber.representation.PedidoFaturadoEventRepresentation"
+logging:
+  level:
+    br.com.henrique.estudos: DEBUG
+
+ironforge:
+  pedidos:
+    clients:
+      produtos:
+        url: 'http://localhost:8081'
+      clientes:
+        url: 'http://localhost:8082'
+  config:
+    kafka:
+      server-url: 'localhost:29092'
+      topics:
+        pedido-pago: 'ironforge.pedidos.pedido-pago'
+        pedido-faturado: 'ironforge.pedidos.pedido-faturado'
+        pedido-enviado: 'ironforge.pedidos.pedido-enviado'

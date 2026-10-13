@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: ironforge-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Painel Web
+    environment:
+      RABBITMQ_DEFAULT_USER: ironforgeadmin
+      RABBITMQ_DEFAULT_PASS: ironforge123

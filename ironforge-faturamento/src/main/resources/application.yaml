@@ -1,0 +1,55 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ironforge-faturamento
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ironforge_faturamento
+    username: ironforgeadmin
+    password: ironforge123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+
+  kafka:
+    bootstrap-servers: 'localhost:29092'
+    consumer:
+      group-id: ironforge-faturamento-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: "br.com.henrique.estudos.ironforge_faturamento.subscriber.representation.PedidoPagoEventRepresentationDTO"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin123
+  bucket-name: ironforge-faturas
+
+ironforge:
+  config:
+    kafka:
+      server-url: 'localhost:29092'
+      topics:
+        pedido-pago: 'ironforge.pedidos.pedido-pago'
+        pedido-faturado: 'ironforge.pedidos.pedido-faturado'

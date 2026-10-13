@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:17.4
+    container_name: ironforge-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ironforgeadmin
+      POSTGRES_PASSWORD: ironforge123
+      POSTGRES_MULTIPLE_DATABASES: ironforge_clientes, ironforge_produtos, ironforge_pedidos, ironforge_faturamento, ironforge_logistica
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data

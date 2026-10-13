@@ -1,0 +1,7 @@
+# ironforge-infra/docker-compose.yml
+include:
+  - broker/docker-compose.yml
+  - database/docker-compose.yml
+  - rabbitmq/docker-compose.yml
+  - security/docker-compose.yml
+  - storage/docker-compose.yml
