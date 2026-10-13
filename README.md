@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./docs/images/logo.png" alt="IronForge Logo" width="180">
+
 # 🔥 IronForge API Ecosystem
 
 ### Ecossistema de microsserviços para um e-commerce de suplementos esportivos
