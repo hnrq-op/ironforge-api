@@ -610,10 +610,9 @@ Cada microsserviço contém sua própria aplicação, controllers, DTOs, entidad
 ## 🖼️ Capturas de tela
 
 
+![Arquitetura do IronForge](./docs/images/arquitetura.png)
 
-![Arquitetura do IronForge](.docs/images/arquitetura.png)
-
-![Documento PDF gerado](.docs/images/nota-fiscal.png)
+![Documento PDF gerado](./docs/images/nota-fiscal.png)
 
 ---
 
