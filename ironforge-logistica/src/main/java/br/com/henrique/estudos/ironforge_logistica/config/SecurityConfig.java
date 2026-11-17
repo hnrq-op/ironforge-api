@@ -15,7 +15,13 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/logistica/callback-logistica").permitAll()
+                        .requestMatchers(
+                                "/logistica/callback-logistica",
+                                "/actuator/health/**",
+                                "/actuator/prometheus",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 ).build();
     }

@@ -1,21 +1,25 @@
 server:
-  port: 8083
+  port: ${SERVER_PORT:8083}
+  shutdown: graceful
 
 spring:
   application:
     name: ironforge-pedidos
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
   autoconfigure:
     exclude:
       - org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/ironforge_pedidos
-    username: ironforgeadmin
-    password: ironforge123
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ironforge_pedidos}
+    username: ${DB_USER:ironforgeadmin}
+    password: ${DB_PASSWORD:ironforge123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: true
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: ${JPA_SHOW_SQL:true}
     properties:
       hibernate:
         format_sql: true
@@ -23,26 +27,27 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/ironforge-realm
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ironforge-realm}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8080/realms/ironforge-realm/protocol/openid-connect/certs}
       client:
         registration:
           ironforge-pedidos-service:
             provider: keycloak
-            client-id: ironforge-pedidos-service
-            client-secret: "${CLIENT_SECRET:}"
+            client-id: ${CLIENT_ID:ironforge-pedidos-service}
+            client-secret: ${CLIENT_SECRET:}
             authorization-grant-type: client_credentials
             scope: openid
         provider:
           keycloak:
-            issuer-uri: http://localhost:8080/realms/ironforge-realm
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8080/realms/ironforge-realm/protocol/openid-connect/token}
   jackson:
     default-property-inclusion: non_null
     deserialization:
       fail-on-unknown-properties: false
   kafka:
-    bootstrap-servers: 'localhost:29092'
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
     consumer:
-      group-id: ironforge-pedidos-group-v2
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:ironforge-pedidos-group-v2}
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
@@ -50,22 +55,40 @@ spring:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
         spring.json.trusted.packages: "*"
         spring.json.use.type.headers: false
-        spring.json.value.default.type: "br.com.henrique.estudos.ironforge_pedidos.subscriber.representation.PedidoFaturadoEventRepresentation"
-logging:
-  level:
-    br.com.henrique.estudos: DEBUG
+        spring.json.value.default.type: br.com.henrique.estudos.ironforge_pedidos.subscriber.representation.PedidoFaturadoEventRepresentation
 
 ironforge:
   pedidos:
     clients:
       produtos:
-        url: 'http://localhost:8081'
+        url: ${CLIENTS_PRODUTOS:http://localhost:8081}
       clientes:
-        url: 'http://localhost:8082'
+        url: ${CLIENTS_CLIENTES:http://localhost:8082}
   config:
     kafka:
-      server-url: 'localhost:29092'
+      server-url: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
       topics:
-        pedido-pago: 'ironforge.pedidos.pedido-pago'
-        pedido-faturado: 'ironforge.pedidos.pedido-faturado'
-        pedido-enviado: 'ironforge.pedidos.pedido-enviado'
+        pedido-pago: ${TOPIC_PEDIDO_PAGO:ironforge.pedidos.pedido-pago}
+        pedido-faturado: ${TOPIC_PEDIDO_FATURADO:ironforge.pedidos.pedido-faturado}
+        pedido-enviado: ${TOPIC_PEDIDO_ENVIADO:ironforge.pedidos.pedido-enviado}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method

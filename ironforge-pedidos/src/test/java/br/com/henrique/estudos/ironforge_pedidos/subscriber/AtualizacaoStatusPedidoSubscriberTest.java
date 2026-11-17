@@ -46,7 +46,7 @@ class AtualizacaoStatusPedidoSubscriberTest {
                 pedidoId,
                 StatusPedido.FATURADO,
                 "http://nota.fiscal/123",
-                "BR123456789BR"
+                null
         );
     }
 
@@ -67,18 +67,18 @@ class AtualizacaoStatusPedidoSubscriberTest {
         doThrow(new RuntimeException("Erro ao atualizar banco"))
                 .when(service).atualizarStatus(
                         pedidoId,
-                        StatusPedido.ENVIADO,
-                        null,
-                        "BR123456789BR"
+                        StatusPedido.FATURADO,
+                        "http://nota.fiscal/123",
+                        null
                 );
 
         assertThatNoException().isThrownBy(() -> subscriber.receberPedidoFaturado(atualizacao));
 
         verify(service).atualizarStatus(
                 pedidoId,
-                StatusPedido.ENVIADO,
-                null,
-                "BR123456789BR"
+                StatusPedido.FATURADO,
+                "http://nota.fiscal/123",
+                null
         );
     }
 }

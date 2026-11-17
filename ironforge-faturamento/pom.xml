@@ -23,6 +23,7 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<minio.version>8.5.12</minio.version>
 		<jasperreports.version>6.21.3</jasperreports.version>
+		<springdoc.version>3.2.0</springdoc.version>
 	</properties>
 
 	<dependencies>
@@ -42,6 +43,21 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-kafka</artifactId>
+		</dependency>
+
+		<!-- Cloud-Native: Observabilidade & Documentação (Swagger) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${springdoc.version}</version>
 		</dependency>
 
 		<!-- Armazenamento de Arquivos (MinIO S3 SDK) -->
