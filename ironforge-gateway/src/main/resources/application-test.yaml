@@ -1,0 +1,35 @@
+server:
+  port: 0
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:
+          jwk-set-uri: http://localhost:9999/realms/ironforge-test/protocol/openid-connect/certs
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: ironforge-produtos
+              uri: http://localhost:8081
+              predicates:
+                - Path=/produtos/**,/estoques/**
+
+            - id: ironforge-clientes
+              uri: http://localhost:8082
+              predicates:
+                - Path=/clientes/**,/enderecos/**
+
+            - id: ironforge-pedidos
+              uri: http://localhost:8083
+              predicates:
+                - Path=/pedidos/**
+
+            - id: ironforge-logistica
+              uri: http://localhost:8085
+              predicates:
+                - Path=/logistica/**

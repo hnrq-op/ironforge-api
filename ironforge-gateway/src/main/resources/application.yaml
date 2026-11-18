@@ -1,0 +1,109 @@
+server:
+  port: ${SERVER_PORT:8000}
+  shutdown: graceful
+
+spring:
+  application:
+    name: ironforge-gateway
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ironforge-realm}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8080/realms/ironforge-realm/protocol/openid-connect/certs}
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200}
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+          routes:
+            - id: ironforge-produtos
+              uri: ${PRODUTOS_URI:http://localhost:8081}
+              predicates:
+                - Path=/produtos/**,/estoques/**
+
+            - id: ironforge-clientes
+              uri: ${CLIENTES_URI:http://localhost:8082}
+              predicates:
+                - Path=/clientes/**,/enderecos/**
+
+            - id: ironforge-pedidos
+              uri: ${PEDIDOS_URI:http://localhost:8083}
+              predicates:
+                - Path=/pedidos/**
+
+            - id: ironforge-logistica
+              uri: ${LOGISTICA_URI:http://localhost:8085}
+              predicates:
+                - Path=/logistica/**
+
+            - id: openapi-produtos
+              uri: ${PRODUTOS_URI:http://localhost:8081}
+              predicates:
+                - Path=/v3/api-docs/produtos
+              filters:
+                - RewritePath=/v3/api-docs/produtos, /v3/api-docs
+
+            - id: openapi-clientes
+              uri: ${CLIENTES_URI:http://localhost:8082}
+              predicates:
+                - Path=/v3/api-docs/clientes
+              filters:
+                - RewritePath=/v3/api-docs/clientes, /v3/api-docs
+
+            - id: openapi-pedidos
+              uri: ${PEDIDOS_URI:http://localhost:8083}
+              predicates:
+                - Path=/v3/api-docs/pedidos
+              filters:
+                - RewritePath=/v3/api-docs/pedidos, /v3/api-docs
+
+            - id: openapi-logistica
+              uri: ${LOGISTICA_URI:http://localhost:8085}
+              predicates:
+                - Path=/v3/api-docs/logistica
+              filters:
+                - RewritePath=/v3/api-docs/logistica, /v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Produtos e Estoques
+        url: /v3/api-docs/produtos
+      - name: Clientes e Endereços
+        url: /v3/api-docs/clientes
+      - name: Pedidos
+        url: /v3/api-docs/pedidos
+      - name: Logística
+        url: /v3/api-docs/logistica
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
