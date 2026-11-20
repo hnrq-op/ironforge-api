@@ -1,4 +1,4 @@
-package br.com.henrique.estudos.ironforge_logistica.controller.exceptions;
+package br.com.henrique.estudos.ironforge_logistica.controller.exception;
 
 import br.com.henrique.estudos.ironforge_logistica.exceptions.ValidationException;
 import jakarta.persistence.EntityNotFoundException;
