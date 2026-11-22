@@ -1,15 +1,17 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:17.4
     container_name: ironforge-postgres
-    restart: always
     environment:
-      POSTGRES_USER: ironforgeadmin
-      POSTGRES_PASSWORD: ironforge123
-      POSTGRES_MULTIPLE_DATABASES: ironforge_clientes, ironforge_produtos, ironforge_pedidos, ironforge_faturamento, ironforge_logistica
+      POSTGRES_USER: ${POSTGRES_USER:-ironforgeadmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ironforge123}
     ports:
       - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ironforgeadmin} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

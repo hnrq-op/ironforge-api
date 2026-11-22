@@ -46,6 +46,7 @@ minio:
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin123}
   bucket-name: ${MINIO_BUCKET_NAME:ironforge-faturas}
+  public-url: ${MINIO_PUBLIC_URL:http://localhost:9000}
 
 ironforge:
   config:

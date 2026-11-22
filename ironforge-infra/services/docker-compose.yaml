@@ -1,0 +1,188 @@
+services:
+  ironforge-produtos:
+    build:
+      context: ../../ironforge-produtos
+      dockerfile: Dockerfile
+    container_name: ironforge-produtos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseSerialGC -Xms128m -Xmx256m"
+      SERVER_PORT: 8081
+      DB_HOST: ${POSTGRES_HOST:-ironforge-postgres}
+      DB_PORT: ${POSTGRES_PORT:-5432}
+      DB_NAME: ironforge_produtos
+      DB_USER: ${POSTGRES_USER:-ironforgeadmin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ironforge123}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/realms/ironforge-realm}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_URL:-http://ironforge-keycloak:8080}/realms/${KEYCLOAK_REALM:-ironforge-realm}/protocol/openid-connect/certs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ironforge-clientes:
+    build:
+      context: ../../ironforge-clientes
+      dockerfile: Dockerfile
+    container_name: ironforge-clientes
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseSerialGC -Xms128m -Xmx256m"
+      SERVER_PORT: 8082
+      DB_HOST: ${POSTGRES_HOST:-ironforge-postgres}
+      DB_PORT: ${POSTGRES_PORT:-5432}
+      DB_NAME: ironforge_clientes
+      DB_USER: ${POSTGRES_USER:-ironforgeadmin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ironforge123}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/realms/ironforge-realm}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_URL:-http://ironforge-keycloak:8080}/realms/${KEYCLOAK_REALM:-ironforge-realm}/protocol/openid-connect/certs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8082/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ironforge-pedidos:
+    build:
+      context: ../../ironforge-pedidos
+      dockerfile: Dockerfile
+    container_name: ironforge-pedidos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseSerialGC -Xms128m -Xmx256m"
+      SERVER_PORT: 8083
+      DB_HOST: ${POSTGRES_HOST:-ironforge-postgres}
+      DB_PORT: ${POSTGRES_PORT:-5432}
+      DB_NAME: ironforge_pedidos
+      DB_USER: ${POSTGRES_USER:-ironforgeadmin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ironforge123}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-ironforge-kafka:9092}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/realms/ironforge-realm}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_URL:-http://ironforge-keycloak:8080}/realms/${KEYCLOAK_REALM:-ironforge-realm}/protocol/openid-connect/certs
+      KEYCLOAK_TOKEN_URI: ${KEYCLOAK_URL:-http://ironforge-keycloak:8080}/realms/${KEYCLOAK_REALM:-ironforge-realm}/protocol/openid-connect/token
+      CLIENT_ID: ${KEYCLOAK_PEDIDOS_CLIENT_ID:-ironforge-pedidos-service}
+      CLIENT_SECRET: ${KEYCLOAK_PEDIDOS_CLIENT_SECRET:-ironforge-pedidos-secret-2026}
+      CLIENTS_PRODUTOS: http://ironforge-produtos:8081
+      CLIENTS_CLIENTES: http://ironforge-clientes:8082
+      WEBHOOK_API_KEY: ${WEBHOOK_API_KEY:-ironforge-webhook-secret-key}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8083/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ironforge-faturamento:
+    build:
+      context: ../../ironforge-faturamento
+      dockerfile: Dockerfile
+    container_name: ironforge-faturamento
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseSerialGC -Xms128m -Xmx384m"
+      SERVER_PORT: 8084
+      DB_HOST: ${POSTGRES_HOST:-ironforge-postgres}
+      DB_PORT: ${POSTGRES_PORT:-5432}
+      DB_NAME: ironforge_faturamento
+      DB_USER: ${POSTGRES_USER:-ironforgeadmin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ironforge123}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-ironforge-kafka:9092}
+      MINIO_ENDPOINT: ${MINIO_URL:-http://ironforge-minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_FATURAS:-ironforge-faturas}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9000}
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8084/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ironforge-logistica:
+    build:
+      context: ../../ironforge-logistica
+      dockerfile: Dockerfile
+    container_name: ironforge-logistica
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseSerialGC -Xms128m -Xmx256m"
+      SERVER_PORT: 8085
+      DB_HOST: ${POSTGRES_HOST:-ironforge-postgres}
+      DB_PORT: ${POSTGRES_PORT:-5432}
+      DB_NAME: ironforge_logistica
+      DB_USER: ${POSTGRES_USER:-ironforgeadmin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ironforge123}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-ironforge-kafka:9092}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8085/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ironforge-gateway:
+    build:
+      context: ../../ironforge-gateway
+      dockerfile: Dockerfile
+    container_name: ironforge-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      ironforge-produtos:
+        condition: service_started
+      ironforge-clientes:
+        condition: service_started
+      ironforge-pedidos:
+        condition: service_started
+      ironforge-logistica:
+        condition: service_started
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseSerialGC -Xms128m -Xmx256m"
+      SERVER_PORT: 8000
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8080/realms/ironforge-realm}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_URL:-http://ironforge-keycloak:8080}/realms/${KEYCLOAK_REALM:-ironforge-realm}/protocol/openid-connect/certs
+      PRODUTOS_URI: http://ironforge-produtos:8081
+      CLIENTES_URI: http://ironforge-clientes:8082
+      PEDIDOS_URI: http://ironforge-pedidos:8083
+      LOGISTICA_URI: http://ironforge-logistica:8085
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8000/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+database/data/
+storage/docs/
+security/data/
+.env

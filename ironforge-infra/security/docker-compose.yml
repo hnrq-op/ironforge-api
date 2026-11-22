@@ -1,12 +1,22 @@
-version: '3.9'
-
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
     container_name: ironforge-keycloak
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    command: start-dev
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HOSTNAME_URL: http://localhost:8080
+      JAVA_OPTS_APPEND: "-Xms256m -Xmx512m"
+    command: start-dev --import-realm
     ports:
       - "8080:8080"
+    volumes:
+      - ./data:/opt/keycloak/data/h2
+      - ./realm:/opt/keycloak/data/import:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
