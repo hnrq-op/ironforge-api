@@ -4,6 +4,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.SetBucketPolicyArgs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,16 +29,16 @@ class MinioStorageServiceTest {
     private MinioStorageService minioStorageService;
 
     private final String BUCKET = "ironforge-faturas-test";
-    private final String ENDPOINT = "http://localhost:9000";
+    private final String PUBLIC_URL = "http://localhost:9000";
 
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(minioStorageService, "bucketName", BUCKET);
-        ReflectionTestUtils.setField(minioStorageService, "minioEndpoint", ENDPOINT);
+        ReflectionTestUtils.setField(minioStorageService, "minioPublicUrl", PUBLIC_URL);
     }
 
     @Test
-    @DisplayName("Deve fazer upload do PDF no MinIO com sucesso quando o bucket já existir")
+    @DisplayName("Deve fazer upload do PDF no storage com sucesso quando o bucket já existir")
     void deveFazerUploadDoPdfComSucessoQuandoBucketJaExistir() throws Exception {
         byte[] pdfBytes = "PDF TEST CONTENT".getBytes();
         String nomeArquivo = "notafiscal_pedido_123.pdf";
@@ -46,14 +47,15 @@ class MinioStorageServiceTest {
 
         String url = minioStorageService.uploadPdf(nomeArquivo, pdfBytes);
 
-        assertThat(url).isEqualTo(ENDPOINT + "/" + BUCKET + "/" + nomeArquivo);
+        assertThat(url).isEqualTo(PUBLIC_URL + "/" + BUCKET + "/" + nomeArquivo);
         verify(minioClient).bucketExists(any(BucketExistsArgs.class));
         verify(minioClient, never()).makeBucket(any(MakeBucketArgs.class));
+        verify(minioClient, never()).setBucketPolicy(any(SetBucketPolicyArgs.class));
         verify(minioClient).putObject(any(PutObjectArgs.class));
     }
 
     @Test
-    @DisplayName("Deve criar o bucket e fazer upload do PDF quando o bucket não existir")
+    @DisplayName("Deve criar o bucket, aplicar política pública e fazer upload do PDF quando o bucket não existir")
     void deveCriarBucketEFazerUploadQuandoBucketNaoExistir() throws Exception {
         byte[] pdfBytes = "PDF TEST CONTENT".getBytes();
         String nomeArquivo = "notafiscal_pedido_123.pdf";
@@ -62,14 +64,15 @@ class MinioStorageServiceTest {
 
         String url = minioStorageService.uploadPdf(nomeArquivo, pdfBytes);
 
-        assertThat(url).isEqualTo(ENDPOINT + "/" + BUCKET + "/" + nomeArquivo);
+        assertThat(url).isEqualTo(PUBLIC_URL + "/" + BUCKET + "/" + nomeArquivo);
         verify(minioClient).bucketExists(any(BucketExistsArgs.class));
         verify(minioClient).makeBucket(any(MakeBucketArgs.class));
+        verify(minioClient).setBucketPolicy(any(SetBucketPolicyArgs.class));
         verify(minioClient).putObject(any(PutObjectArgs.class));
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando ocorrer falha ao interagir com o MinIO")
+    @DisplayName("Deve lançar exceção quando ocorrer falha ao interagir com o storage")
     void deveLancarExcecaoQuandoMinioFalhar() throws Exception {
         byte[] pdfBytes = "PDF TEST CONTENT".getBytes();
         String nomeArquivo = "notafiscal_pedido_123.pdf";
@@ -79,6 +82,6 @@ class MinioStorageServiceTest {
 
         assertThatThrownBy(() -> minioStorageService.uploadPdf(nomeArquivo, pdfBytes))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("Falha no envio do PDF para o MinIO");
+                .hasMessage("Falha no envio do PDF para o storage");
     }
 }
