@@ -25,6 +25,7 @@
 		<minio.version>8.5.12</minio.version>
 		<jasperreports.version>6.21.3</jasperreports.version>
 		<springdoc.version>3.2.0</springdoc.version>
+		<bouncycastle.version>1.85</bouncycastle.version>
 	</properties>
 
 	<dependencies>
@@ -133,6 +134,26 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
