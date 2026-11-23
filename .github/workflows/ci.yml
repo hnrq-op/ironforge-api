@@ -1,0 +1,99 @@
+name: IronForge CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  detectar-alteracoes:
+    name: Detectar Microsserviços Alterados
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.set-matrix.outputs.services }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Filtrar caminhos alterados
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ironforge-clientes:
+              - 'ironforge-clientes/**'
+            ironforge-produtos:
+              - 'ironforge-produtos/**'
+            ironforge-pedidos:
+              - 'ironforge-pedidos/**'
+            ironforge-faturamento:
+              - 'ironforge-faturamento/**'
+            ironforge-logistica:
+              - 'ironforge-logistica/**'
+            ironforge-gateway:
+              - 'ironforge-gateway/**'
+
+      - name: Montar matriz de execução
+        id: set-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SERVICES='["ironforge-clientes","ironforge-produtos","ironforge-pedidos","ironforge-faturamento","ironforge-logistica","ironforge-gateway"]'
+          else
+            SERVICES=$(jq -c -n '
+              [
+                (if "${{ steps.filter.outputs.ironforge-clientes }}" == "true" then "ironforge-clientes" else empty end),
+                (if "${{ steps.filter.outputs.ironforge-produtos }}" == "true" then "ironforge-produtos" else empty end),
+                (if "${{ steps.filter.outputs.ironforge-pedidos }}" == "true" then "ironforge-pedidos" else empty end),
+                (if "${{ steps.filter.outputs.ironforge-faturamento }}" == "true" then "ironforge-faturamento" else empty end),
+                (if "${{ steps.filter.outputs.ironforge-logistica }}" == "true" then "ironforge-logistica" else empty end),
+                (if "${{ steps.filter.outputs.ironforge-gateway }}" == "true" then "ironforge-gateway" else empty end)
+              ]')
+          fi
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+          if [ "$SERVICES" = "[]" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+  build-e-testes:
+    name: Testar e Validar (${{ matrix.service }})
+    needs: detectar-alteracoes
+    if: needs.detectar-alteracoes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.detectar-alteracoes.outputs.services) }}
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+          cache-dependency-path: ${{ matrix.service }}/pom.xml
+
+      - name: Executar testes automatizados (Maven)
+        working-directory: ${{ matrix.service }}
+        run: mvn -B test
+
+      - name: Build da imagem Docker
+        working-directory: ${{ matrix.service }}
+        run: docker build -t ironforge-${{ matrix.service }}:ci .
+
+      - name: Scan de Segurança com Trivy
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            ghcr.io/aquasecurity/trivy:latest image \
+            --exit-code 1 \
+            --ignore-unfixed \
+            --severity CRITICAL \
+            ironforge-${{ matrix.service }}:ci
