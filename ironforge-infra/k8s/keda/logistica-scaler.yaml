@@ -1,0 +1,19 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: logistica-kafka-scaler
+spec:
+  scaleTargetRef:
+    name: ironforge-logistica
+  pollingInterval: 10
+  cooldownPeriod: 60
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: "10.0.1.4:9092"
+        consumerGroup: "ironforge-logistica-group"
+        topic: "ironforge.pedidos.pedido-faturado"
+        lagThreshold: "1"
+        offsetResetPolicy: "earliest"

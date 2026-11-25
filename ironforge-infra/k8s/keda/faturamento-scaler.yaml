@@ -1,0 +1,19 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: faturamento-kafka-scaler
+spec:
+  scaleTargetRef:
+    name: ironforge-faturamento
+  pollingInterval: 10
+  cooldownPeriod: 60
+  minReplicaCount: 0
+  maxReplicaCount: 3
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: "10.0.1.4:9092"
+        consumerGroup: "ironforge-faturamento-group"
+        topic: "ironforge.pedidos.pedido-pago"
+        lagThreshold: "1"
+        offsetResetPolicy: "earliest"

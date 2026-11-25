@@ -1,0 +1,46 @@
+replicaCount: 1
+
+image:
+  repository: ironforgeacrhnq26.azurecr.io/ironforge-service
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+jvmOptions: "-XX:+UseSerialGC -XX:MaxRAMPercentage=55.0 -Xss256k"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "220Mi"
+  limits:
+    cpu: "500m"
+    memory: "350Mi"
+
+env:
+  SERVER_PORT: "8080"
+  DB_HOST: "10.0.1.4"
+  DB_PORT: "5432"
+  DB_NAME: ""
+  JPA_DDL_AUTO: "update"
+  JPA_SHOW_SQL: "false"
+  KAFKA_BOOTSTRAP_SERVERS: "10.0.1.4:9092"
+  KEYCLOAK_ISSUER_URI: "http://10.0.1.4:8080/realms/ironforge-realm"
+  KEYCLOAK_JWK_SET_URI: "http://10.0.1.4:8080/realms/ironforge-realm/protocol/openid-connect/certs"
+  MINIO_ENDPOINT: "http://10.0.1.4:9000"
+  MINIO_BUCKET_NAME: "ironforge-faturas"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus,metrics"
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
+  MANAGEMENT_HEALTH_LIVENESSSTATE_ENABLED: "true"
+  MANAGEMENT_HEALTH_READINESSSTATE_ENABLED: "true"
+
+extraEnv: {}
+
+secrets:
+  DB_USER: "ironforgeadmin"
+  DB_PASSWORD: "ironforge123"
+  MINIO_ACCESS_KEY: "minioadmin"
+  MINIO_SECRET_KEY: "minioadmin123"

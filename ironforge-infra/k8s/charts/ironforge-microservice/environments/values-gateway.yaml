@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: ironforgeacrhnq26.azurecr.io/ironforge-gateway
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "240Mi"
+  limits:
+    cpu: "500m"
+    memory: "380Mi"
+
+extraEnv:
+  PRODUTOS_URI: "http://ironforge-produtos:8080"
+  CLIENTES_URI: "http://ironforge-clientes:8080"
+  PEDIDOS_URI: "http://ironforge-pedidos:8080"
+  LOGISTICA_URI: "http://ironforge-logistica:8080"
+  CORS_ALLOWED_ORIGINS: "http://api.INGRESS_IP.nip.io,http://localhost:3000"

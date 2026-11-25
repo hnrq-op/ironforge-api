@@ -1,0 +1,22 @@
+---
+infra_dir: /opt/ironforge-infra
+vnet_cidr: "10.0.0.0/16"
+
+# PostgreSQL (alinhado com os defaults dos application.yml)
+postgres_user: ironforgeadmin
+postgres_password: ironforge123
+postgres_databases:
+  - ironforge_clientes
+  - ironforge_produtos
+  - ironforge_pedidos
+  - ironforge_faturamento
+  - ironforge_logistica
+
+# Keycloak
+keycloak_admin_user: admin
+keycloak_admin_password: admin_password
+
+# MinIO (alinhado com os defaults do faturamento)
+minio_root_user: minioadmin
+minio_root_password: minioadmin123
+minio_bucket_name: ironforge-faturas

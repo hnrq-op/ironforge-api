@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: ironforgeacrhnq26.azurecr.io/ironforge-logistica
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "220Mi"
+  limits:
+    cpu: "500m"
+    memory: "350Mi"
+
+env:
+  DB_NAME: "ironforge_logistica"
+
+extraEnv:
+  KAFKA_CONSUMER_GROUP_ID: "ironforge-logistica-group"

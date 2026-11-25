@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ironforge-keycloak-bridge
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: ironforge-keycloak-bridge
+subsets:
+  - addresses:
+      - ip: 10.0.1.4
+    ports:
+      - name: http
+        port: 8080
+        protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ironforge-minio-bridge
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: ironforge-minio-bridge
+subsets:
+  - addresses:
+      - ip: 10.0.1.4
+    ports:
+      - name: http
+        port: 9000
+        protocol: TCP

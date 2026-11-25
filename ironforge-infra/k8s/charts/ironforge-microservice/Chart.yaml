@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ironforge-microservice
+description: Helm Chart padronizado para os microsservicos Java Spring Boot do ecossistema IronForge
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ironforge-microservice.fullname" . }}-config
+  labels:
+    {{- include "ironforge-microservice.labels" . | nindent 4 }}
+data:
+  {{- range $key, $val := .Values.env }}
+    {{ $key }}: {{ $val | quote }}
+    {{- end }}
+    {{- range $key, $val := .Values.extraEnv }}
+    {{ $key }}: {{ $val | quote }}
+    {{- end }}

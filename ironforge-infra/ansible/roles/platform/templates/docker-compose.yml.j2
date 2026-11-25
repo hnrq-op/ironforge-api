@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ironforge-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  kafka:
+    image: apache/kafka:3.8.1
+    container_name: ironforge-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://{{ vm_private_ip }}:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx512M -Xms256M"
+    volumes:
+      - kafka_data:/tmp/kraft-combined-logs
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    container_name: ironforge-keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: "{{ keycloak_admin_user }}"
+      KEYCLOAK_ADMIN_PASSWORD: "{{ keycloak_admin_password }}"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_PROXY_HEADERS: xforwarded
+      JAVA_OPTS_APPEND: "-Xms256m -Xmx512m"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+      - keycloak_data:/opt/keycloak/data/h2
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  minio:
+    image: minio/minio:latest
+    container_name: ironforge-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: "{{ minio_root_user }}"
+      MINIO_ROOT_PASSWORD: "{{ minio_root_password }}"
+    volumes:
+      - minio_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: ironforge-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 {{ minio_root_user }} {{ minio_root_password }}; do sleep 2; done;
+      mc mb --ignore-existing local/{{ minio_bucket_name }};
+      mc anonymous set download local/{{ minio_bucket_name }};
+      exit 0;
+      "
+
+volumes:
+  postgres_data:
+  kafka_data:
+  keycloak_data:
+  minio_data:

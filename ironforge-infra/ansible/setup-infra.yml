@@ -1,0 +1,21 @@
+---
+- name: Provisionar Ambiente de Suporte IronForge na VM Linux
+  hosts: infra_vm
+  gather_facts: true
+
+  roles:
+    - common
+    - docker
+    - platform
+
+  post_tasks:
+    - name: Validar portas dos serviços de infraestrutura na rede interna
+      ansible.builtin.wait_for:
+        host: "127.0.0.1"
+        port: "{{ item }}"
+        timeout: 90
+      loop:
+        - 5432   # PostgreSQL
+        - 9092   # Apache Kafka
+        - 8080   # Keycloak
+        - 9000   # MinIO API

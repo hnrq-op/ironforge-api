@@ -1,0 +1,19 @@
+replicaCount: 0
+
+image:
+  repository: ironforgeacrhnq26.azurecr.io/ironforge-faturamento
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "240Mi"
+  limits:
+    cpu: "500m"
+    memory: "380Mi"
+
+env:
+  DB_NAME: "ironforge_faturamento"
+
+extraEnv:
+  KAFKA_CONSUMER_GROUP_ID: "ironforge-faturamento-group"
+  MINIO_PUBLIC_URL: "http://api.INGRESS_IP.nip.io"

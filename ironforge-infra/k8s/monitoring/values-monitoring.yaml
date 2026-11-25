@@ -1,0 +1,49 @@
+alertmanager:
+  enabled: false
+
+kubeApiServer:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 6h
+    scrapeInterval: 15s
+    serviceMonitorSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "200Mi"
+      limits:
+        cpu: "500m"
+        memory: "350Mi"
+
+grafana:
+  adminPassword: "admin"
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "100Mi"
+    limits:
+      cpu: "250m"
+      memory: "150Mi"
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "80Mi"
+    limits:
+      cpu: "200m"
+      memory: "150Mi"

@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: ironforgeacrhnq26.azurecr.io/ironforge-pedidos
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "240Mi"
+  limits:
+    cpu: "500m"
+    memory: "380Mi"
+
+env:
+  DB_NAME: "ironforge_pedidos"
+
+extraEnv:
+  CLIENTS_PRODUTOS: "http://ironforge-produtos:8080"
+  CLIENTS_CLIENTES: "http://ironforge-clientes:8080"
+  KEYCLOAK_TOKEN_URI: "http://10.0.1.4:8080/realms/ironforge-realm/protocol/openid-connect/token"
+  CLIENT_ID: "ironforge-pedidos-service"
+  KAFKA_CONSUMER_GROUP_ID: "ironforge-pedidos-group-v2"
+
+secrets:
+  CLIENT_SECRET: ""

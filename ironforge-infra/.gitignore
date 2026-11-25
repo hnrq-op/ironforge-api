@@ -35,4 +35,20 @@ build/
 database/data/
 storage/docs/
 security/data/
+security/realm/ironforge-realm.json
 .env
+
+
+# Terraform e Inventário Ansible (com senha da VM)
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+ansible/inventory/hosts.ini

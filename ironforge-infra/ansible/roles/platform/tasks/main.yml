@@ -1,0 +1,45 @@
+---
+- name: Criar estrutura de diretórios da plataforma na VM
+  ansible.builtin.file:
+    path: "{{ infra_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - ""
+    - "postgres"
+    - "keycloak"
+
+- name: Gerar script de criação dos 5 bancos de dados no PostgreSQL
+  ansible.builtin.template:
+    src: init-databases.sql.j2
+    dest: "{{ infra_dir }}/postgres/init-databases.sql"
+    mode: "0644"
+
+- name: Verificar se existem arquivos de Realm do Keycloak em ironforge-infra/security/realm
+  ansible.builtin.find:
+    paths: "{{ playbook_dir }}/../security/realm"
+    patterns: "*.json"
+  delegate_to: localhost
+  become: false
+  register: realm_files
+
+- name: Copiar arquivos JSON do Realm do Keycloak para a VM
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ infra_dir }}/keycloak/{{ item.path | basename }}"
+    mode: "0644"
+  loop: "{{ realm_files.files }}"
+  when: realm_files.matched > 0
+
+- name: Renderizar docker-compose.yml com IP privado da VM ({{ vm_private_ip }})
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ infra_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Subir todos os contêineres de infraestrutura via Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ infra_dir }}"
+  register: compose_result
+  changed_when: "'Started' in compose_result.stderr or 'Created' in compose_result.stderr"
