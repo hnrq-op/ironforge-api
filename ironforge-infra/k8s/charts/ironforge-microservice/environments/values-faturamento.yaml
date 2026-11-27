@@ -17,3 +17,5 @@ env:
 extraEnv:
   KAFKA_CONSUMER_GROUP_ID: "ironforge-faturamento-group"
   MINIO_PUBLIC_URL: "http://api.INGRESS_IP.nip.io"
+
+jvmOptions: "-Djava.awt.headless=true -XX:+UseSerialGC -XX:MaxRAMPercentage=55.0 -Xss256k"

@@ -19,6 +19,7 @@
   ansible.builtin.find:
     paths: "{{ playbook_dir }}/../security/realm"
     patterns: "*.json"
+    excludes: "*.example.json"
   delegate_to: localhost
   become: false
   register: realm_files

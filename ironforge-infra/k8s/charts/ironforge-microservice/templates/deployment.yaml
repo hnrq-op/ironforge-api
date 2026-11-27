@@ -23,7 +23,7 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
           env:
-            - name: JAVA_TOOL_OPTIONS
+            - name: JAVA_OPTS
               value: {{ .Values.jvmOptions | quote }}
           envFrom:
             - configMapRef:

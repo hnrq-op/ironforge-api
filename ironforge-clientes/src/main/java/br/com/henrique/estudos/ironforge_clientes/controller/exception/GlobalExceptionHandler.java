@@ -3,7 +3,6 @@ package br.com.henrique.estudos.ironforge_clientes.controller.exception;
 import br.com.henrique.estudos.ironforge_clientes.exceptions.RegistroDuplicadoException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException; // Import do Spring Security corrigido
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;

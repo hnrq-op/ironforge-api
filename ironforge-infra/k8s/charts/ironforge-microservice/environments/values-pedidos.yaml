@@ -22,4 +22,5 @@ extraEnv:
   KAFKA_CONSUMER_GROUP_ID: "ironforge-pedidos-group-v2"
 
 secrets:
-  CLIENT_SECRET: ""
+  CLIENT_SECRET: "ironforge-pedidos-secret-2026"
+  WEBHOOK_API_KEY: "123456"
